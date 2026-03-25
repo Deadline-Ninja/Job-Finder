@@ -15,7 +15,7 @@ import {
   SelectValue 
 } from '../../components/ui/select';
 import { Label } from '../../components/ui/label';
-import { Mail, Phone, MapPin, Search, Loader2, Eye, Trash2, Check, X, FileText, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MapPin, Search, Loader2, Eye, Trash2, Check, X, FileText, ExternalLink, Users } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
 
 interface Application {
@@ -36,6 +36,7 @@ interface Application {
       company: string;
       startDate?: string;
       endDate?: string;
+      years?: number | string;
       description: string;
     }>;
     education?: Array<{
@@ -243,10 +244,16 @@ export function Applicants() {
                   className={`p-4 bg-white border rounded-lg cursor-pointer transition-all ${selectedApplicant?._id === app._id ? 'border-[#0A66C2] shadow-sm' : 'border-[#00000014] hover:shadow-md'}`}
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <img src={app.userId.profilePhoto} className="w-10 h-10 object-cover rounded-full border border-[#00000014]" alt={app.userId.name} />
+                    <img 
+                      src={app.userId.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(app.userId.name)}&background=0A66C2&color=fff`} 
+                      className="w-10 h-10 object-cover rounded-full border border-[#00000014]" 
+                      alt={app.userId.name} 
+                    />
                     <div className="min-w-0">
                       <h4 className="text-sm font-semibold text-[#000000E0] truncate">{app.userId.name}</h4>
-                      <p className="text-[11px] text-[#00000099]">{getStatusBadge(app.status)}</p>
+                      <div className="flex items-center gap-2">
+                        {getStatusBadge(app.status)}
+                      </div>
                     </div>
                   </div>
                   <div className="flex justify-between items-center text-[10px] text-[#00000099] font-semibold uppercase tracking-wider">
@@ -270,7 +277,11 @@ export function Applicants() {
                 {/* Detail Header */}
                 <div className="p-6 border-b border-[#0000000D] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div className="flex items-center gap-4">
-                    <img src={selectedApplicant.userId.profilePhoto} className="w-16 h-16 object-cover rounded-full border border-[#00000014]" alt="" />
+                    <img 
+                      src={selectedApplicant.userId.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedApplicant.userId.name)}&background=0A66C2&color=fff`} 
+                      className="w-16 h-16 object-cover rounded-full border border-[#00000014]" 
+                      alt="" 
+                    />
                     <div>
                       <h2 className="text-xl font-semibold text-[#000000E0]">{selectedApplicant.userId.name}</h2>
                       <div className="flex items-center gap-3 text-sm text-[#00000099] mt-1">
@@ -336,8 +347,8 @@ export function Applicants() {
                           </div>
                           <div>
                             <h4 className="text-sm font-semibold text-[#000000E0]">{exp.title}</h4>
-                            <p className="text-xs text-[#000000E0]">{exp.company}</p>
-                            <p className="text-[11px] text-[#00000099] mt-1">{exp.description}</p>
+                            <p className="text-xs text-[#000000E0] font-medium">{exp.company} • {exp.years || 'N/A'}</p>
+                            <p className="text-[11px] text-[#00000099] mt-1 leading-relaxed">{exp.description}</p>
                           </div>
                         </div>
                       ))}
@@ -349,15 +360,23 @@ export function Applicants() {
                   <div>
                     <h3 className="text-base font-semibold text-[#000000E0] mb-4">Documents</h3>
                     <div className="flex gap-4">
-                      <div className="flex-1 p-4 border border-[#00000014] rounded-lg hover:bg-[#F3F2EF] cursor-pointer transition-colors group">
+                      <div 
+                        onClick={() => {
+                          if (selectedApplicant.resume) {
+                            toast.info(`Opening ${selectedApplicant.resume}...`);
+                            window.open('#', '_blank');
+                          }
+                        }}
+                        className="flex-1 p-4 border border-[#00000014] rounded-lg hover:bg-[#F3F2EF] cursor-pointer transition-colors group"
+                      >
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 bg-blue-50 text-[#0A66C2] rounded-sm flex items-center justify-center">
                                     <FileText className="w-4 h-4" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold text-[#000000E0]">Resume.pdf</p>
-                                    <p className="text-[10px] text-[#00000099]">PDF Document • 2.4 MB</p>
+                                    <p className="text-sm font-semibold text-[#000000E0]">{selectedApplicant.resume || 'Resume.pdf'}</p>
+                                    <p className="text-[10px] text-[#00000099]">PDF Document • Verified</p>
                                 </div>
                             </div>
                             <ExternalLink className="w-4 h-4 text-[#00000099] opacity-0 group-hover:opacity-100 transition-opacity" />

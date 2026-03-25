@@ -42,49 +42,58 @@ export interface JobsListResponse {
   };
 }
 
-export const getJobs = (params?: any): Promise<{ data: JobsListResponse }> => 
-  axiosInstance.get('/jobs', { params });
+// Mock Jobs API with LocalStorage Persistence
+const getStorageJobs = () => JSON.parse(localStorage.getItem('jobfinder_jobs') || '[]');
+const setStorageJobs = (jobs: any[]) => localStorage.setItem('jobfinder_jobs', JSON.stringify(jobs));
 
-export const getJobById = (id: string): Promise<{ data: { success: boolean, job: JobResponse } }> => 
-  axiosInstance.get(`/jobs/${id}`);
+export const getJobs = async (params?: any): Promise<{ data: JobsListResponse }> => {
+  const jobs = getStorageJobs();
+  // Simple filtering for simulation
+  let filtered = jobs.filter((j: any) => j.status === 'Active');
+  if (params?.location) filtered = filtered.filter((j: any) => j.location.includes(params.location));
+  return { data: { success: true, count: filtered.length, jobs: filtered } };
+};
 
-export const getFeaturedJobs = (): Promise<{ data: JobsListResponse }> => 
-  axiosInstance.get('/jobs/featured');
+export const getJobById = async (id: string): Promise<{ data: { success: boolean, job: JobResponse } }> => {
+  const job = getStorageJobs().find((j: any) => j._id === id);
+  if (!job) throw { response: { data: { message: "Job node not found." } } };
+  return { data: { success: true, job } };
+};
 
-export const getRecommendedJobs = (): Promise<{ data: JobsListResponse }> => 
-  axiosInstance.get('/jobs/recommended');
+export const createJob = async (data: any): Promise<{ data: { success: boolean, job: JobResponse } }> => {
+  const jobs = getStorageJobs();
+  const currentUser = JSON.parse(localStorage.getItem('jobfinder_current_user') || '{}');
+  const newJob = {
+    ...data,
+    _id: `JOB-${Math.floor(Math.random() * 100000)}`,
+    company: currentUser.name || 'Anonymous Corp',
+    postedBy: currentUser.id,
+    postedAt: new Date().toISOString(),
+    views: 0,
+    applications: 0,
+    status: 'Active'
+  };
+  jobs.unshift(newJob);
+  setStorageJobs(jobs);
+  return { data: { success: true, job: newJob } };
+};
 
-export const getNearbyJobs = (params?: any): Promise<{ data: JobsListResponse }> => 
-  axiosInstance.get('/jobs/nearby', { params });
+export const getMyJobs = async (params?: any): Promise<{ data: JobsListResponse }> => {
+  const currentUser = JSON.parse(localStorage.getItem('jobfinder_current_user') || '{}');
+  const jobs = getStorageJobs().filter((j: any) => j.postedBy === currentUser.id);
+  return { data: { success: true, count: jobs.length, jobs } };
+};
 
-export const getJobStats = (): Promise<{ data: { success: boolean, stats: any } }> => 
-  axiosInstance.get('/jobs/stats');
-
-export const createJob = (data: any): Promise<{ data: { success: boolean, job: JobResponse } }> => 
-  axiosInstance.post('/jobs', data);
-
-export const updateJob = (id: string, data: any): Promise<{ data: { success: boolean, job: JobResponse } }> => 
-  axiosInstance.put(`/jobs/${id}`, data);
-
-export const deleteJob = (id: string): Promise<{ data: { success: boolean, message: string } }> => 
-  axiosInstance.delete(`/jobs/${id}`);
-
-export const getMyJobs = (params?: any): Promise<{ data: JobsListResponse }> => 
-  axiosInstance.get('/jobs/employer/my-jobs', { params });
-
-export const getCompanyJobs = (companyName: string): Promise<{ data: JobsListResponse }> => 
-  axiosInstance.get('/jobs', { params: { company: companyName } });
+export const deleteJob = async (id: string): Promise<{ data: { success: boolean, message: string } }> => {
+  const jobs = getStorageJobs().filter((j: any) => j._id !== id);
+  setStorageJobs(jobs);
+  return { data: { success: true, message: "Job node terminated." } };
+};
 
 export default {
   getJobs,
   getJobById,
-  getFeaturedJobs,
-  getRecommendedJobs,
-  getNearbyJobs,
-  getJobStats,
   createJob,
-  updateJob,
-  deleteJob,
   getMyJobs,
-  getCompanyJobs
+  deleteJob
 };

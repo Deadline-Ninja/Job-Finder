@@ -32,8 +32,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [error, setError] = useState<string | null>(null);
 
   const checkAuth = useCallback(async () => {
-    const token = localStorage.getItem('token');
-    const mockUser = localStorage.getItem('mockUser');
+    const token = localStorage.getItem('jobfinder_token');
     
     if (!token) {
       setUser(null);
@@ -41,18 +40,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return;
     }
     
-    if (mockUser && token.startsWith('dummy-')) {
-      setUser(JSON.parse(mockUser));
-      setLoading(false);
-      return;
-    }
-
     try {
       const res = await authAPI.getCurrentUser();
-      setUser(res.data.user as User);
+      if (res.data.success && res.data.user) {
+        setUser(res.data.user as User);
+      } else {
+        localStorage.removeItem('jobfinder_token');
+        localStorage.removeItem('jobfinder_current_user');
+        setUser(null);
+      }
     } catch (err) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('mockUser');
+      localStorage.removeItem('jobfinder_token');
+      localStorage.removeItem('jobfinder_current_user');
       setUser(null);
     } finally {
       setLoading(false);
@@ -92,8 +91,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           role: 'admin',
           kycVerified: true
         };
-        localStorage.setItem('token', 'dummy-admin-token');
-        localStorage.setItem('mockUser', JSON.stringify(loggedInUser));
       }
       // Generic login fallback
       else {
@@ -101,14 +98,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           id: `user-${Date.now()}`,
           name: credentials.email.split('@')[0],
           email: credentials.email,
-          role: 'seeker',
-          profilePhoto: `https://api.dicebear.com/7.x/initials/svg?seed=${credentials.email}&backgroundColor=0A66C2`,
+          role: credentials.role || 'seeker',
+          profilePhoto: `https://ui-avatars.com/api/?name=${encodeURIComponent(credentials.email)}&background=0A66C2&color=fff`,
           kycVerified: false,
-          mobile: credentials.email.includes('user') ? '9812345678' : '',
+          mobile: '9812345678',
           preferredJobType: 'Hybrid'
         };
-        localStorage.setItem('token', `dummy-generic-token`);
-        localStorage.setItem('mockUser', JSON.stringify(loggedInUser));
+      }
+
+      localStorage.setItem('jobfinder_token', `dummy-token-${Date.now()}`);
+      localStorage.setItem('jobfinder_current_user', JSON.stringify(loggedInUser));
+
+      // Also ensure it's in the users list for retrieval
+      const users = JSON.parse(localStorage.getItem('jobfinder_users') || '[]');
+      if (!users.find((u: any) => u.email === loggedInUser.email)) {
+        users.push(loggedInUser);
+        localStorage.setItem('jobfinder_users', JSON.stringify(users));
       }
 
 
@@ -137,8 +142,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         preferredJobType: 'Onsite'
       };
       
-      localStorage.setItem('token', `dummy-reg-token-${Date.now()}`);
-      localStorage.setItem('mockUser', JSON.stringify(newProfile));
+      localStorage.setItem('jobfinder_token', `dummy-reg-token-${Date.now()}`);
+      localStorage.setItem('jobfinder_current_user', JSON.stringify(newProfile));
+      
+      const users = JSON.parse(localStorage.getItem('jobfinder_users') || '[]');
+      users.push(newProfile);
+      localStorage.setItem('jobfinder_users', JSON.stringify(users));
       setUser(newProfile);
       return { user: newProfile };
     } catch (err) {
@@ -150,10 +159,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('mockUser');
+    localStorage.removeItem('jobfinder_token');
+    localStorage.removeItem('jobfinder_current_user');
     setUser(null);
-    window.location.href = '/';
+    window.location.href = '/login';
   };
 
   return (
