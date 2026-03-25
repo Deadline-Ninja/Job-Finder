@@ -6,12 +6,15 @@ import { Input } from '../../components/ui/input';
 import { useNavigate, useLocation } from 'react-router';
 import { toast } from 'sonner';
 
+import { useAuth } from '../../hooks/useAuth';
+
 export function VerifyOTP() {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(60);
   const navigate = useNavigate();
   const location = useLocation();
+  const { verifyOTP, resendOTP } = useAuth() as any;
   const email = location.state?.email || "your email";
 
   useEffect(() => {
@@ -36,16 +39,29 @@ export function VerifyOTP() {
 
   const handleVerify = async () => {
     setLoading(true);
-    // Simulation: Success if OTP matches 123456
-    setTimeout(() => {
+    try {
+      await verifyOTP(email, otp.join(''));
+      toast.success("Identity Verified! Matrix node activated.");
+      // The AuthContext automatically sets the user token on success
+      // which will trigger the protected route redirect
+      setTimeout(() => {
+        window.location.href = '/'; // Force reload to trigger auth check routing
+      }, 1000);
+    } catch (error: any) {
+      toast.error(error.message || "Invalid OTP. Signal rejected.");
+    } finally {
       setLoading(false);
-      if (otp.join('') === '123456') {
-        toast.success("Identity Verified! Matrix node activated.");
-        navigate('/login');
-      } else {
-        toast.error("Invalid OTP. Signal rejected.");
-      }
-    }, 1500);
+    }
+  };
+
+  const handleResend = async () => {
+    try {
+      await resendOTP(email);
+      setTimer(60);
+      toast.info("A new OTP has been transmitted to your email.");
+    } catch (error) {
+      toast.error("Failed to resend Protocol.");
+    }
   };
 
   return (
@@ -93,7 +109,7 @@ export function VerifyOTP() {
             {timer > 0 ? (
               <span>Link expires in {timer}s</span>
             ) : (
-              <button onClick={() => setTimer(60)} className="text-black flex items-center gap-1 hover:underline">
+              <button onClick={handleResend} className="text-black flex items-center gap-1 hover:underline">
                 <RefreshCw className="w-3 h-3" /> Resend Protocol
               </button>
             )}

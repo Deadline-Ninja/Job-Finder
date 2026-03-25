@@ -12,28 +12,29 @@ import applicationsAPI from '../../api/applicationsAPI';
 import savedJobsAPI from '../../api/savedJobsAPI';
 import { mockJobs, mockApplications, Job } from '../../data/mockData';
 
+import { useAuth } from '../../hooks/useAuth';
+
 export function JobSeekerDashboard() {
+  const { user } = useAuth();
   const [recommendedJobs, setRecommendedJobs] = useState<Job[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
   const [savedJobsCount, setSavedJobsCount] = useState(0);
   const [profileCompletion, setProfileCompletion] = useState(75);
-  const [userName, setUserName] = useState('Job Seeker');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [user]);
 
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      // Mock data for demo
-      setUserName('John Doe');
+      // Data for demo
       setProfileCompletion(85);
       setApplications(mockApplications.slice(0, 3));
       setSavedJobsCount(12);
       
-      let fetchedJobs: Job[] = [];
+      let fetchedJobs: any[] = [];
       try {
         const response = await jobsAPI.getJobs({ limit: 4 });
         fetchedJobs = response.data.jobs || [];

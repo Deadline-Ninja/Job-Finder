@@ -90,10 +90,16 @@ export const deleteJob = async (id: string): Promise<{ data: { success: boolean,
   return { data: { success: true, message: "Job node terminated." } };
 };
 
+export const getCompanyJobs = async (companyId: string): Promise<{ data: JobsListResponse }> => {
+  const jobs = getStorageJobs().filter((j: any) => j.companyId === companyId);
+  return { data: { success: true, count: jobs.length, jobs } };
+};
+
 export default {
   getJobs,
   getJobById,
   createJob,
   getMyJobs,
-  deleteJob
+  deleteJob,
+  getCompanyJobs
 };

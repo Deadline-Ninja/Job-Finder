@@ -5,12 +5,14 @@ import { TrendingUp, Briefcase, Users, Eye, Loader2, Plus, MapPin, Search } from
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { getCurrentUser } from '../../api/authAPI';
+import { useAuth } from '../../hooks/useAuth';
 import jobsAPI from '../../api/jobsAPI';
 import { getAllEmployerApplications } from '../../api/applicationsAPI';
 import { mockJobs, mockApplications } from '../../data/mockData';
+import { toast } from 'sonner';
 
 export function EmployerDashboard() {
+  const { user, uploadKyc } = useAuth() as any;
   const [chartData, setChartData] = useState<any[]>([]);
   const [recentJobs, setRecentJobs] = useState<any[]>([]);
   const [recentApplicants, setRecentApplicants] = useState<any[]>([]);
@@ -22,6 +24,21 @@ export function EmployerDashboard() {
   });
   const [userName, setUserName] = useState('Employer');
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+
+  const handleKycUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setUploading(true);
+      try {
+        await uploadKyc(e.target.files[0]);
+        toast.success("Document uploaded successfully. Verification pending.");
+      } catch (error) {
+        toast.error("Failed to upload document.");
+      } finally {
+        setUploading(false);
+      }
+    }
+  };
 
   useEffect(() => {
     fetchDashboardData();
@@ -168,6 +185,56 @@ export function EmployerDashboard() {
 
           {/* Sidebar Area */}
           <div className="lg:col-span-4 space-y-6">
+
+            {/* KYC Verification Card */}
+            <div className="bg-white rounded-lg border border-[#00000014] overflow-hidden shadow-sm p-6 relative">
+              {user?.kycVerified ? (
+                <>
+                  <div className="absolute top-0 left-0 w-1 h-full bg-green-500" />
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-sm font-semibold text-[#000000E0]">Company Verification</h3>
+                    <Badge className="bg-green-50 text-green-700 hover:bg-green-50">Verified</Badge>
+                  </div>
+                  <p className="text-xs text-[#00000099] leading-relaxed">Your company identity has been verified by our admins. You have full access to all employer features.</p>
+                </>
+              ) : user?.kycDocument ? (
+                <>
+                  <div className="absolute top-0 left-0 w-1 h-full bg-yellow-500" />
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-sm font-semibold text-[#000000E0]">Company Verification</h3>
+                    <Badge className="bg-yellow-50 text-yellow-700 hover:bg-yellow-50">Pending</Badge>
+                  </div>
+                  <p className="text-xs text-[#00000099] leading-relaxed">Your document ({user.kycDocument}) is currently under review by our admin team. This usually takes 1-2 business days.</p>
+                </>
+              ) : (
+                <>
+                  <div className="absolute top-0 left-0 w-1 h-full bg-red-500" />
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-sm font-semibold text-[#000000E0]">Company Verification</h3>
+                    <Badge className="bg-red-50 text-red-700 hover:bg-red-50">Action Required</Badge>
+                  </div>
+                  <p className="text-xs text-[#00000099] leading-relaxed mb-4">You must verify your company identity before you can post jobs. Please upload a valid business registration document.</p>
+                  
+                  <div className="relative">
+                    <input 
+                      type="file" 
+                      id="kyc-dashboard-upload"
+                      className="hidden" 
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={handleKycUpload}
+                      disabled={uploading}
+                    />
+                    <label 
+                      htmlFor="kyc-dashboard-upload"
+                    >
+                      <Button asChild variant="outline" className="w-full border-red-200 text-red-700 hover:bg-red-50 cursor-pointer">
+                        <span>{uploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <TrendingUp className="w-4 h-4 mr-2" />} Upload Document</span>
+                      </Button>
+                    </label>
+                  </div>
+                </>
+              )}
+            </div>
             
             {/* Recent Applicants */}
             <div className="bg-white rounded-lg border border-[#00000014] overflow-hidden shadow-sm">

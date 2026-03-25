@@ -17,17 +17,17 @@ interface AdminRecord {
 
 // --- Components ---
 const Card = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-  <div className={`bg-white border border-black/10 rounded-sm p-6 shadow-sm hover:border-black/30 transition-all ${className}`}>
+  <div className={`bg-white border border-[#00000014] rounded-lg p-6 shadow-sm hover:shadow-md transition-all ${className}`}>
     {children}
   </div>
 );
 
 const AdminButton = ({ children, onClick, className = "", variant = "primary" }: { children: React.ReactNode, onClick?: () => void, className?: string, variant?: 'primary' | 'danger' | 'ghost' }) => {
-  const base = "px-6 py-3 rounded-none font-black uppercase tracking-widest text-[10px] shadow-sm transition-all duration-300 transform active:scale-95";
+  const base = "px-6 py-2 rounded-full font-bold text-sm shadow-sm transition-all duration-300 transform active:scale-95";
   const styles = {
-    primary: "bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:shadow-blue-500/20 hover:shadow-xl hover:-translate-y-0.5",
+    primary: "bg-[#0A66C2] text-white hover:bg-[#004182]",
     danger: "bg-red-600 text-white hover:bg-red-700",
-    ghost: "bg-transparent border border-black/10 text-black hover:bg-black hover:text-white"
+    ghost: "bg-transparent border border-[#00000099] text-[#00000099] hover:bg-black/5"
   };
   return (
     <button onClick={onClick} className={`${base} ${styles[variant]} ${className}`}>
@@ -39,12 +39,12 @@ const AdminButton = ({ children, onClick, className = "", variant = "primary" }:
 const Modal = ({ isOpen, onClose, title, children }: { isOpen: boolean, onClose: () => void, title: string, children: React.ReactNode }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white border-4 border-black w-full max-w-xl p-10 shadow-[20px_20px_0px_0px_rgba(37,99,235,1)] relative">
-        <button onClick={onClose} className="absolute top-6 right-6 hover:rotate-90 transition-transform">
-          <X className="w-8 h-8" />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className="bg-white rounded-xl w-full max-w-xl p-8 shadow-2xl relative border border-[#00000014]">
+        <button onClick={onClose} className="absolute top-6 right-6 hover:bg-gray-100 p-1 rounded-full transition-colors">
+          <X className="w-6 h-6 text-[#00000099]" />
         </button>
-        <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-8 border-b-2 border-black pb-4">{title}</h2>
+        <h2 className="text-2xl font-bold text-[#000000E0] mb-6">{title}</h2>
         {children}
       </div>
     </div>
@@ -218,13 +218,13 @@ export function AdminDashboard() {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <Shield className="w-10 h-10 text-blue-600" />
-                <span className="text-xs font-black uppercase tracking-[0.5em] text-black/40">Secured Node_01</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#00000099]">Secured Node_01</span>
               </div>
-              <h1 className="text-7xl font-black uppercase tracking-tighter italic leading-none">
+              <h1 className="text-4xl font-bold tracking-tight text-[#000000E0]">
                 Command Center
               </h1>
-              <p className="text-2xl mt-6 max-w-2xl font-bold tracking-tight text-black line-clamp-2">
-                Real-time governance over the administrative matrix. Monitor, moderate, and manipulate system entities.
+              <p className="text-lg mt-4 max-w-2xl text-[#00000099] font-medium leading-relaxed">
+                Real-time governance over the administrative matrix. Monitor, moderate, and manage system entities with precision.
               </p>
             </div>
             <div className="flex flex-col items-end gap-4">
@@ -250,10 +250,10 @@ export function AdminDashboard() {
                 <div className={`p-4 ${stat.color} text-white shadow-lg shadow-black/10`}>
                   <stat.icon className="w-8 h-8" />
                 </div>
-                <div className="text-[10px] font-black uppercase tracking-widest text-[#2563EB]">Live_Sync</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-[#0A66C2]">Live Sync</div>
               </div>
-              <h3 className="text-xs font-black uppercase tracking-[0.3em] text-black/50 mb-2">{stat.label}</h3>
-              <p className="text-5xl font-black tracking-tighter italic text-black">{stat.value}</p>
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#00000099] mb-2">{stat.label}</h3>
+              <p className="text-3xl font-bold tracking-tight text-[#000000E0]">{stat.value}</p>
             </Card>
           ))}
         </section>
@@ -271,7 +271,7 @@ export function AdminDashboard() {
                     }`}
                 >
                     {activeTab === tab && <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600" />}
-                    Manage_{tab}
+                    Manage {tab}
                 </button>
                 ))}
             </div>
@@ -283,7 +283,7 @@ export function AdminDashboard() {
                         placeholder={`Filter ${activeTab} metadata...`}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="bg-gray-100 border-2 border-transparent border-b-black/10 px-12 py-3 text-sm font-bold w-80 focus:bg-white focus:border-black outline-none transition-all placeholder:italic"
+                        className="bg-[#F3F2EF] rounded-lg px-12 py-2 text-sm font-medium w-80 focus:bg-white border-[#00000014] focus:border-[#0A66C2] outline-none transition-all placeholder:text-[#00000099]"
                     />
                 </div>
                 <AdminButton onClick={handleOpenAddModal}>
@@ -297,11 +297,11 @@ export function AdminDashboard() {
               <table className="w-full text-left">
                 <thead className="bg-black text-white border-b-4 border-blue-600">
                   <tr>
-                    <th className="px-8 py-6 text-xs font-black uppercase tracking-[0.2em]">Hash_ID</th>
-                    <th className="px-8 py-6 text-xs font-black uppercase tracking-[0.2em]">Entity_Designation</th>
-                    <th className="px-8 py-6 text-xs font-black uppercase tracking-[0.2em]">Operational_State</th>
-                    <th className="px-8 py-6 text-xs font-black uppercase tracking-[0.2em]">Sync_Timestamp</th>
-                    <th className="px-8 py-6 text-xs font-black uppercase tracking-[0.2em] text-right">Command_Actions</th>
+                    <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest">Hash_ID</th>
+                    <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest">Entity_Designation</th>
+                    <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest">Operational_State</th>
+                    <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest">Sync_Timestamp</th>
+                    <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-right">Command_Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y-2 divide-black/5">
@@ -310,31 +310,31 @@ export function AdminDashboard() {
                       <td className="px-8 py-8 font-mono text-[10px] text-black/40 font-bold">{record.id}</td>
                       <td className="px-8 py-8">
                          <div className="flex flex-col gap-2">
-                             <div className="font-black uppercase text-base text-black group-hover:translate-x-1 transition-transform">{record.name}</div>
-                             <div className="text-xs text-black/40 font-bold lowercase italic">{record.subtext}</div>
+                             <div className="font-bold uppercase text-sm text-[#000000E0] group-hover:translate-x-1 transition-transform">{record.name}</div>
+                             <div className="text-[10px] text-[#00000099] font-medium lowercase italic">{record.subtext}</div>
                              {record.type === 'users' && (
-                                <div className="flex items-center gap-2 mt-1">
-                                    <span className={`text-[9px] font-black px-2 py-0.5 border ${record.status === 'Active' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-orange-50 text-orange-700 border-orange-200'}`}>
-                                        KYC_{record.status === 'Active' ? 'VERIFIED' : 'PENDING'}
-                                    </span>
-                                </div>
+                                 <div className="flex items-center gap-2 mt-1">
+                                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${record.status === 'Active' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-orange-50 text-orange-700 border-orange-200'}`}>
+                                         KYC {record.status === 'Active' ? 'Verified' : 'Pending'}
+                                     </span>
+                                 </div>
                              )}
                          </div>
                       </td>
                        <td className="px-8 py-8">
-                         <button 
-                            onClick={() => record.type === 'users' && record.status === 'Pending' ? handleOpenKycModal(record) : handleToggleStatus(record.id)}
-                            className={`px-4 py-1 border-2 font-black uppercase text-[9px] tracking-widest transition-all ${
-                                record.status === 'Active' ? 'bg-black text-white border-black' : 
-                                record.status === 'Pending' ? 'bg-white text-black border-black/20 text-black/40 hover:border-black hover:text-black' : 
-                                record.status === 'Flagged' ? 'bg-blue-600 text-white border-blue-600' :
-                                'bg-red-600 text-white border-red-600'
-                            }`}
-                         >
-                            {record.type === 'users' && record.status === 'Active' ? 'Revoke_KYC' : 
-                             record.type === 'users' && record.status === 'Pending' ? 'Inspect_KYC' : 
-                             record.status}
-                         </button>
+                          <button 
+                             onClick={() => record.type === 'users' && record.status === 'Pending' ? handleOpenKycModal(record) : handleToggleStatus(record.id)}
+                             className={`px-3 py-1 rounded-md font-bold text-[10px] transition-all border ${
+                                 record.status === 'Active' ? 'bg-[#F3F2EF] text-[#0A66C2] border-[#0A66C2]/20' : 
+                                 record.status === 'Pending' ? 'bg-white text-[#00000099] border-[#00000014] hover:border-[#00000099]' : 
+                                 record.status === 'Flagged' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                 'bg-red-50 text-red-700 border-red-200'
+                             }`}
+                          >
+                             {record.type === 'users' && record.status === 'Active' ? 'Revoke KYC' : 
+                              record.type === 'users' && record.status === 'Pending' ? 'Inspect KYC' : 
+                              record.status}
+                          </button>
                       </td>
                       <td className="px-8 py-8 text-sm italic font-bold text-black/60">
                          {new Date(record.date).toLocaleDateString()}
@@ -412,11 +412,11 @@ export function AdminDashboard() {
                 />
             </div>
             <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-black/50">Operational Protocol</label>
+                <label className="text-xs font-bold text-[#00000099]">Entity Designation</label>
                 <select 
                     value={formData.status}
                     onChange={(e) => setFormData({...formData, status: e.target.value as any})}
-                    className="w-full border-2 border-black p-4 text-sm font-bold bg-gray-50 focus:bg-white focus:outline-none transition-all uppercase tracking-widest"
+                    className="w-full border border-[#00000014] rounded-lg p-3 text-sm font-medium bg-[#F3F2EF] focus:bg-white focus:outline-none focus:border-[#0A66C2] transition-all"
                 >
                     <option value="Active">Active Protocol</option>
                     <option value="Pending">Pending Audit</option>

@@ -9,7 +9,10 @@ import { useNavigate } from 'react-router';
 import { AlertCircle, CheckCircle, Loader2, ArrowLeft } from 'lucide-react';
 import * as jobsAPI from '../../api/jobsAPI';
 
+import { useAuth } from '../../hooks/useAuth';
+
 export function PostJob() {
+  const { user } = useAuth() as any;
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -46,6 +49,10 @@ export function PostJob() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (step === 1) {
+      if (!user?.kycVerified) {
+        setError('Your company must be verified by an admin before you can post jobs. Please upload your registration documents from the dashboard.');
+        return;
+      }
       setStep(2);
       return;
     }

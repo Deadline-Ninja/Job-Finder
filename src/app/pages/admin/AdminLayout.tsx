@@ -35,28 +35,28 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#F4F2EE]">
       <div className="flex">
         {/* Mobile Toggle */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="lg:hidden fixed top-24 left-4 z-50 bg-white border border-black/10 rounded-none p-2 shadow-sm"
+          className="lg:hidden fixed top-24 left-4 z-50 bg-white border border-[#00000014] rounded-full p-2 shadow-md"
         >
-          {sidebarOpen ? <X className="w-5 h-5 text-black" /> : <Menu className="w-5 h-5 text-black" />}
+          {sidebarOpen ? <X className="w-5 h-5 text-[#00000099]" /> : <Menu className="w-5 h-5 text-[#00000099]" />}
         </button>
 
         {/* Admin Sidebar */}
         <aside className={`
-          fixed lg:sticky top-0 h-screen w-72 bg-white border-r border-black/10 
+          fixed lg:sticky top-0 h-screen w-72 bg-white border-r border-[#00000014] 
           transform transition-transform duration-300 z-40 overflow-y-auto
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
-          <div className="flex flex-col h-full p-8">
-            <div className="mb-12">
-              <h2 className="text-3xl font-bold tracking-tighter text-black uppercase italic">
-                ADMIN CONSOLE
+          <div className="flex flex-col h-full p-6">
+            <div className="mb-10 px-2">
+              <h2 className="text-xl font-bold tracking-tight text-[#0A66C2]">
+                Admin Console
               </h2>
-              <div className="h-1 w-12 bg-black mt-2" />
+              <p className="text-[10px] text-[#00000099] uppercase tracking-widest font-semibold mt-1">Management Hub</p>
             </div>
 
             <div className="flex-1 space-y-1">
@@ -70,34 +70,34 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     to={item.path}
                     onClick={() => setSidebarOpen(false)}
                     className={`
-                      flex items-center space-x-4 px-6 py-4 transition-all border-b border-black/5
+                      flex items-center space-x-3 px-4 py-3 rounded-lg transition-all
                       ${isActive 
-                        ? 'bg-black text-white' 
-                        : 'text-black hover:bg-gray-100'
+                        ? 'bg-[#F3F2EF] text-[#0A66C2]' 
+                        : 'text-[#00000099] hover:bg-[#F3F2EF] hover:text-[#000000E0]'
                       }
                     `}
                   >
-                    <Icon className="w-5 h-5" />
-                    <span className="text-lg font-medium">{item.name}</span>
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-[#0A66C2]' : 'text-[#00000099]'}`} />
+                    <span className="text-sm font-semibold">{item.name}</span>
                   </Link>
                 );
               })}
             </div>
 
-            <div className="pt-8 mt-auto border-t border-black/10">
+            <div className="pt-6 mt-auto border-t border-[#00000014]">
               <button 
                 onClick={handleLogout}
-                className="flex items-center space-x-4 px-6 py-4 w-full text-black hover:bg-red-50 hover:text-red-600 transition-colors"
+                className="flex items-center space-x-3 px-4 py-3 w-full text-[#00000099] hover:bg-red-50 hover:text-red-600 transition-colors rounded-lg font-semibold"
               >
                 <LogOut className="w-5 h-5" />
-                <span className="text-lg font-medium tracking-tight">System Termination</span>
+                <span className="text-sm">Sign Out</span>
               </button>
             </div>
           </div>
         </aside>
 
         {/* Main Administrative Content */}
-        <main className="flex-1 p-8 lg:p-12 min-h-screen overflow-y-auto text-black">
+        <main className="flex-1 p-6 lg:p-10 min-h-screen overflow-y-auto text-[#000000E0]">
           <div className="max-w-7xl mx-auto">
              {children}
           </div>

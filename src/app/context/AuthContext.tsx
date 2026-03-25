@@ -10,6 +10,8 @@ export interface User {
   profilePhoto?: string;
   companyName?: string;
   kycVerified?: boolean;
+  isVerified?: boolean; // OTP verification
+  kycDocument?: string; // Filename or path
   mobile?: string;
   preferredJobType?: string;
 }
@@ -20,6 +22,9 @@ interface AuthContextType {
   error: string | null;
   login: (credentials: any) => Promise<any>;
   register: (data: any) => Promise<any>;
+  verifyOTP: (email: string, otp: string) => Promise<void>;
+  resendOTP: (email: string) => Promise<void>;
+  uploadKyc: (file: File) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
 }
@@ -72,8 +77,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (credentials.provider) {
         loggedInUser = {
           id: `user-${credentials.provider}`,
-          name: `${credentials.provider.charAt(0).toUpperCase() + credentials.provider.slice(1)} User`,
-          email: `user@${credentials.provider}.com`,
+          name: credentials.name || `${credentials.provider.charAt(0).toUpperCase() + credentials.provider.slice(1)} User`,
+          email: credentials.email || `user@${credentials.provider}.com`,
           role: 'seeker',
           kycVerified: false,
           mobile: '',
@@ -126,11 +131,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setLoading(false);
     }
   };
+  
+  const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
   const register = async (data: any) => {
     setLoading(true);
     setError(null);
     try {
+      const otp = generateOTP();
       const newProfile: User = {
         id: `newuser-${Date.now()}`,
         name: data.name || 'New User',
@@ -138,21 +146,86 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         role: data.role || 'seeker',
         profilePhoto: `https://api.dicebear.com/7.x/initials/svg?seed=${data.email}&backgroundColor=0A66C2`,
         kycVerified: false,
+        isVerified: false,
+        kycDocument: data.kycDocument ? data.kycDocument.name : undefined,
         mobile: '',
         preferredJobType: 'Onsite'
       };
       
-      localStorage.setItem('jobfinder_token', `dummy-reg-token-${Date.now()}`);
-      localStorage.setItem('jobfinder_current_user', JSON.stringify(newProfile));
-      
+      // Store pending user and OTP in localStorage (simulating DB)
       const users = JSON.parse(localStorage.getItem('jobfinder_users') || '[]');
+      if (users.find((u: any) => u.email === data.email)) {
+        throw new Error('User already exists');
+      }
+      
       users.push(newProfile);
       localStorage.setItem('jobfinder_users', JSON.stringify(users));
-      setUser(newProfile);
-      return { user: newProfile };
-    } catch (err) {
-      setError('Registration failed');
+      localStorage.setItem(`otp_${data.email}`, otp);
+      
+      console.log(`[JOBfinder Security] OTP for ${data.email}: ${otp}`);
+      // In production, this would call send_otp.php
+      
+      return { success: true, email: data.email };
+    } catch (err: any) {
+      setError(err.message || 'Registration failed');
       throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOTP = async (email: string, otp: string) => {
+    setLoading(true);
+    try {
+      const storedOtp = localStorage.getItem(`otp_${email}`);
+      if (otp === storedOtp || otp === '123456') { // Allow 123456 for demo
+        const users = JSON.parse(localStorage.getItem('jobfinder_users') || '[]');
+        const userIndex = users.findIndex((u: any) => u.email === email);
+        
+        if (userIndex !== -1) {
+          users[userIndex].isVerified = true;
+          localStorage.setItem('jobfinder_users', JSON.stringify(users));
+          
+          // Log them in automatically after verification
+          const verifiedUser = users[userIndex];
+          localStorage.setItem('jobfinder_token', `token-${Date.now()}`);
+          localStorage.setItem('jobfinder_current_user', JSON.stringify(verifiedUser));
+          setUser(verifiedUser);
+          localStorage.removeItem(`otp_${email}`);
+        } else {
+          throw new Error('User not found');
+        }
+      } else {
+        throw new Error('Invalid OTP');
+      }
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resendOTP = async (email: string) => {
+    const otp = generateOTP();
+    localStorage.setItem(`otp_${email}`, otp);
+    console.log(`[JOBfinder Security] Resent OTP for ${email}: ${otp}`);
+  };
+
+  const uploadKyc = async (file: File) => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const updatedUser = { ...user, kycDocument: file.name, kycVerified: false };
+      setUser(updatedUser);
+      localStorage.setItem('jobfinder_current_user', JSON.stringify(updatedUser));
+      
+      const users = JSON.parse(localStorage.getItem('jobfinder_users') || '[]');
+      const idx = users.findIndex((u: any) => u.id === user.id);
+      if (idx !== -1) {
+        users[idx] = updatedUser;
+        localStorage.setItem('jobfinder_users', JSON.stringify(users));
+      }
     } finally {
       setLoading(false);
     }
@@ -166,7 +239,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, register, logout, checkAuth }}>
+    <AuthContext.Provider value={{ user, loading, error, login, register, verifyOTP, resendOTP, uploadKyc, logout, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );

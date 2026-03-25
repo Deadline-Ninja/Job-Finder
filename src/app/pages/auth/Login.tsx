@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { useAuth } from '../../hooks/useAuth';
+import { GoogleAccountChooser } from '../../components/GoogleAccountChooser';
 
 export function Login() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isGoogleChooserOpen, setIsGoogleChooserOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +38,11 @@ export function Login() {
   };
 
   const handleSocialLogin = async (provider: string) => {
+    if (provider === 'google') {
+      setIsGoogleChooserOpen(true);
+      return;
+    }
+
     setLoading(true);
     setError('');
     try {
@@ -48,9 +55,34 @@ export function Login() {
     }
   };
 
+  const onGoogleAccountSelect = async (account: { name: string, email: string }) => {
+    setIsGoogleChooserOpen(false);
+    setLoading(true);
+    try {
+      // Simulate login with the chosen account
+      await login({ 
+        provider: 'google', 
+        email: account.email,
+        name: account.name 
+      });
+      navigate('/seeker/dashboard');
+    } catch (err: any) {
+      setError(`Failed to login with Google as ${account.name}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F4F2EE] flex flex-col items-center pt-20 px-4">
       
+      {/* Mock Google Chooser Modal */}
+      <GoogleAccountChooser 
+        isOpen={isGoogleChooserOpen} 
+        onClose={() => setIsGoogleChooserOpen(false)} 
+        onSelect={onGoogleAccountSelect}
+      />
+
       {/* Logo */}
       <Link to="/" className="flex items-center gap-1 mb-8">
         <span className="text-2xl font-bold text-[#0A66C2]">JOB</span>

@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { DashboardLayout } from '../../components/DashboardLayout';
+import { useAuth } from '../../hooks/useAuth';
 import usersAPI from '../../api/usersAPI';
 import { toast } from 'sonner';
 
@@ -48,6 +49,7 @@ const SectionDialog = ({ open, onClose, title, children, onSave, saveLabel = 'Sa
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export function Profile() {
+  const { user: authUser } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -72,7 +74,7 @@ export function Profile() {
   const kycRef = useRef<HTMLInputElement>(null);
 
   // ── Load profile ────────────────────────────────────────────────────────────
-  useEffect(() => { loadProfile(); }, []);
+  useEffect(() => { loadProfile(); }, [authUser]);
 
   const loadProfile = async () => {
     setLoading(true);
@@ -85,17 +87,39 @@ export function Profile() {
     finally { setLoading(false); }
   };
 
-  const setDefaultProfile = () => setProfile({
-    id: 'DEMO-001', name: 'John Doe', email: 'john@example.com',
-    mobile: '+977 9812345678', title: 'Software Engineer',
-    location: 'Kathmandu, Nepal', website: 'https://johndoe.dev',
-    about: 'Passionate software engineer with experience in building scalable web applications for the Nepalese market.',
-    profilePhoto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop',
-    skills: ['React', 'TypeScript', 'Node.js', 'PostgreSQL'],
-    experience: [{ title: 'Senior Software Engineer', company: 'F1Soft International', duration: '2021 - Present', description: 'Developing fintech solutions for the Nepalese banking sector.' }],
-    education: [{ degree: 'BE Computer Engineering', school: 'Tribhuvan University', field: 'Computer Science', startYear: '2015', endYear: '2019' }],
-    kycVerified: false, role: 'seeker'
-  });
+  const setDefaultProfile = () => {
+    if (authUser) {
+      setProfile({
+        id: authUser.id,
+        name: authUser.name,
+        email: authUser.email,
+        mobile: authUser.mobile || '+977 9812345678',
+        title: 'Software Engineer',
+        location: 'Kathmandu, Nepal',
+        website: 'https://jobfinder.com',
+        about: 'Passionate professional looking for new opportunities.',
+        profilePhoto: authUser.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(authUser.name)}&background=0A66C2&color=fff`,
+        skills: ['React', 'TypeScript', 'Node.js'],
+        experience: [],
+        education: [],
+        kycVerified: authUser.kycVerified || false,
+        role: authUser.role
+      });
+      return;
+    }
+
+    setProfile({
+      id: 'DEMO-001', name: 'John Doe', email: 'john@example.com',
+      mobile: '+977 9812345678', title: 'Software Engineer',
+      location: 'Kathmandu, Nepal', website: 'https://johndoe.dev',
+      about: 'Passionate software engineer with experience in building scalable web applications for the Nepalese market.',
+      profilePhoto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop',
+      skills: ['React', 'TypeScript', 'Node.js', 'PostgreSQL'],
+      experience: [{ title: 'Senior Software Engineer', company: 'F1Soft International', duration: '2021 - Present', description: 'Developing fintech solutions for the Nepalese banking sector.' }],
+      education: [{ degree: 'BE Computer Engineering', school: 'Tribhuvan University', field: 'Computer Science', startYear: '2015', endYear: '2019' }],
+      kycVerified: false, role: 'seeker'
+    });
+  };
 
   const persist = async (update: Partial<UserProfile>) => {
     const updated = { ...profile, ...update };
