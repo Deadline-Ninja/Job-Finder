@@ -97,18 +97,43 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           kycVerified: true
         };
       }
-      // Generic login fallback
-      else {
+      // Demo Employer Login
+      else if (credentials.email === 'employer@demo.com') {
         loggedInUser = {
-          id: `user-${Date.now()}`,
-          name: credentials.email.split('@')[0],
-          email: credentials.email,
-          role: credentials.role || 'seeker',
-          profilePhoto: `https://ui-avatars.com/api/?name=${encodeURIComponent(credentials.email)}&background=0A66C2&color=fff`,
-          kycVerified: false,
+          id: 'demo-employer-id',
+          name: 'Demo Employer',
+          email: 'employer@demo.com',
+          role: 'employer',
+          companyName: 'Demo Corp',
+          kycVerified: true,
+          isVerified: true,
           mobile: '9812345678',
           preferredJobType: 'Hybrid'
         };
+      }
+      // Demo Seeker Login
+      else if (credentials.email === 'seeker@demo.com') {
+        loggedInUser = {
+          id: 'demo-seeker-id',
+          name: 'Demo Seeker',
+          email: 'seeker@demo.com',
+          role: 'seeker',
+          kycVerified: true,
+          isVerified: true,
+          mobile: '9812345678',
+          preferredJobType: 'Onsite'
+        };
+      }
+      // Actual user login lookup
+      else {
+        const users = JSON.parse(localStorage.getItem('jobfinder_users') || '[]');
+        const existingUser = users.find((u: any) => u.email === credentials.email);
+        
+        if (existingUser) {
+          loggedInUser = existingUser;
+        } else {
+          throw new Error('User not found. Please register.');
+        }
       }
 
       localStorage.setItem('jobfinder_token', `dummy-token-${Date.now()}`);
@@ -132,13 +157,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
   
-  const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
-
   const register = async (data: any) => {
     setLoading(true);
     setError(null);
     try {
-      const otp = generateOTP();
+
       const newProfile: User = {
         id: `newuser-${Date.now()}`,
         name: data.name || 'New User',
@@ -146,13 +169,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         role: data.role || 'seeker',
         profilePhoto: `https://api.dicebear.com/7.x/initials/svg?seed=${data.email}&backgroundColor=0A66C2`,
         kycVerified: false,
-        isVerified: false,
-        kycDocument: data.kycDocument ? data.kycDocument.name : undefined,
+        isVerified: true,
         mobile: '',
         preferredJobType: 'Onsite'
       };
       
-      // Store pending user and OTP in localStorage (simulating DB)
+      // Store pending user in localStorage (simulating DB)
       const users = JSON.parse(localStorage.getItem('jobfinder_users') || '[]');
       if (users.find((u: any) => u.email === data.email)) {
         throw new Error('User already exists');
@@ -160,10 +182,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       users.push(newProfile);
       localStorage.setItem('jobfinder_users', JSON.stringify(users));
-      localStorage.setItem(`otp_${data.email}`, otp);
-      
-      console.log(`[JOBfinder Security] OTP for ${data.email}: ${otp}`);
-      // In production, this would call send_otp.php
       
       return { success: true, email: data.email };
     } catch (err: any) {
@@ -207,9 +225,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const resendOTP = async (email: string) => {
-    const otp = generateOTP();
-    localStorage.setItem(`otp_${email}`, otp);
-    console.log(`[JOBfinder Security] Resent OTP for ${email}: ${otp}`);
+    console.log(`[JOBfinder Security] OTP bypassed for ${email}`);
   };
 
   const uploadKyc = async (file: File) => {

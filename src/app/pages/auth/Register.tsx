@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 export function Register() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { register } = useAuth();
+  const { register, login } = useAuth();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -19,7 +19,6 @@ export function Register() {
     confirmPassword: '',
     role: searchParams.get('role') || 'seeker'
   });
-  const [kycDocument, setKycDocument] = useState<File | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -29,13 +28,6 @@ export function Register() {
 
   const handleRoleChange = (role: string) => {
     setFormData({ ...formData, role });
-    if (role === 'seeker') setKycDocument(null);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setKycDocument(e.target.files[0]);
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,21 +41,19 @@ export function Register() {
 
     setLoading(true);
     try {
-      if (formData.role === 'employer' && !kycDocument) {
-        setError('Company registration document is required for employers.');
-        setLoading(false);
-        return;
-      }
-
       await register({
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        role: formData.role,
-        kycDocument: kycDocument
+        role: formData.role
       });
-      // Redundant toast removed as per user request
-      navigate('/verify-otp', { state: { email: formData.email } });
+      
+      const result = await login({ email: formData.email, password: formData.password });
+      if (result.user.role === 'employer') {
+        navigate('/employer/dashboard');
+      } else {
+        navigate('/seeker/dashboard');
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed.');
     } finally {
@@ -113,33 +103,6 @@ export function Register() {
             </button>
           </div>
         </div>
-        {formData.role === 'employer' && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-lg">
-            <Label className="text-xs font-semibold text-[#0A66C2] mb-2 block uppercase tracking-wider">Company Verification</Label>
-            <div className="space-y-2">
-              <p className="text-[11px] text-[#00000099] mb-3">To post jobs, we need to verify your company. Please upload a business license or registration document.</p>
-              <div className="relative">
-                <input 
-                  type="file" 
-                  id="kyc-upload"
-                  className="hidden" 
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={handleFileChange}
-                />
-                <label 
-                  htmlFor="kyc-upload"
-                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#0A66C2]/30 rounded-lg bg-white hover:bg-blue-50/50 cursor-pointer transition-all group"
-                >
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Building2 className="w-8 h-8 text-[#0A66C2] mb-2 opacity-60 group-hover:scale-110 transition-transform" />
-                    <p className="text-xs font-semibold text-[#0A66C2]">{kycDocument ? kycDocument.name : 'Click to upload document'}</p>
-                    <p className="text-[10px] text-[#00000066] mt-1">PDF, PNG, JPG (max. 5MB)</p>
-                  </div>
-                </label>
-              </div>
-            </div>
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
