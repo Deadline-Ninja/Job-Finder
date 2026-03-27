@@ -365,7 +365,7 @@ export const mockCompanies: Company[] = [
   {
     id: '1',
     name: 'F1Soft International',
-    logo: '/src/assets/logos/f1soft.png',
+    logo: 'https://ui-avatars.com/api/?name=F1&background=0D8ABC&color=fff&size=200&font-size=0.5',
     industry: 'FinTech',
     size: '500-1000',
     location: 'Hattisar, Kathmandu',
@@ -378,7 +378,7 @@ export const mockCompanies: Company[] = [
   {
     id: '2',
     name: 'Daraz Nepal',
-    logo: '/src/assets/logos/daraz.png',
+    logo: 'https://ui-avatars.com/api/?name=DN&background=FF6A00&color=fff&size=200&font-size=0.5',
     industry: 'E-commerce',
     size: '1000-5000',
     location: 'Naxal, Kathmandu',
@@ -391,7 +391,7 @@ export const mockCompanies: Company[] = [
   {
     id: '3',
     name: 'WorldLink Communications',
-    logo: '/src/assets/logos/worldlink.png',
+    logo: 'https://ui-avatars.com/api/?name=WL&background=004A99&color=fff&size=200&font-size=0.5',
     industry: 'ISP / Telecommunications',
     size: '5000+',
     location: 'Jawalakhel, Lalitpur',
@@ -404,7 +404,7 @@ export const mockCompanies: Company[] = [
   {
     id: '4',
     name: 'Ncell Axiata',
-    logo: '/src/assets/logos/ncell.png',
+    logo: 'https://ui-avatars.com/api/?name=NC&background=660099&color=fff&size=200&font-size=0.5',
     industry: 'Telecommunications',
     size: '1000-5000',
     location: 'Lainchaur, Kathmandu',
@@ -417,7 +417,7 @@ export const mockCompanies: Company[] = [
   {
     id: '5',
     name: 'Nepal Telecom',
-    logo: '/src/assets/logos/ntc.png',
+    logo: 'https://ui-avatars.com/api/?name=NT&background=0033A0&color=fff&size=200&font-size=0.5',
     industry: 'Telecommunications',
     size: '5000+',
     location: 'Bhadrakali, Kathmandu',
@@ -430,7 +430,7 @@ export const mockCompanies: Company[] = [
   {
     id: '6',
     name: 'Pathao Nepal',
-    logo: '/src/assets/logos/pathao.png',
+    logo: 'https://ui-avatars.com/api/?name=PN&background=E52421&color=fff&size=200&font-size=0.5',
     industry: 'Ride-sharing / Delivery',
     size: '200-500',
     location: 'Mid-Baneshwor, Kathmandu',
@@ -443,7 +443,7 @@ export const mockCompanies: Company[] = [
   {
     id: '7',
     name: 'eSewa',
-    logo: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df?w=200&h=200&fit=crop',
+    logo: 'https://ui-avatars.com/api/?name=eS&background=4CAF50&color=fff&size=200&font-size=0.5',
     industry: 'FinTech',
     size: '500-1000',
     location: 'Pulchowk, Lalitpur',
@@ -456,7 +456,7 @@ export const mockCompanies: Company[] = [
   {
     id: '8',
     name: 'Khalti Digital Wallet',
-    logo: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=200&h=200&fit=crop',
+    logo: 'https://ui-avatars.com/api/?name=KH&background=5C2D91&color=fff&size=200&font-size=0.5',
     industry: 'FinTech',
     size: '200-500',
     location: 'Baneshwor, Kathmandu',
